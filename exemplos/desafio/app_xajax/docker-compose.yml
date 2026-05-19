@@ -1,0 +1,12 @@
+services:
+  app-xajax-legado:
+    container_name: app-xajax-legado
+    image: edilsonss123/php:8.2
+    volumes:
+      - ./app:/var/www/apps/
+      - ./data:/var/www/data/
+      - ./data/conf.d/error_reporting.ini:/usr/local/etc/php/conf.d/docker-php-ext-error_reporting.ini
+    ports:
+      - 8024:8000
+    working_dir: /var/www/apps
+    command: php -S 0.0.0.0:8000

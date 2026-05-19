@@ -1,0 +1,17 @@
+{
+  "name": "mcp-usuarios",
+  "version": "1.0.0",
+  "description": "Servidor MCP: CRUD de usuários com persistência em arquivo JSON.",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.4.2"
+  }
+}

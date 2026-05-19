@@ -1,0 +1,19 @@
+{
+    "name": "root/apps",
+    "autoload": {
+        "files": [
+            "./functions.php",
+            "./error.php"
+        ],
+        "psr-4": {
+            "App\\": "src/",
+            "Lib\\": "lib/"
+        }
+    },
+    "authors": [
+        {
+            "name": "edi"
+        }
+    ],
+    "require": {}
+}

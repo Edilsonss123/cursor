@@ -1,0 +1,19 @@
+services:
+  app-crud-pessoa-com-eduardo:
+    container_name: app-crud-pessoa-com-eduardo
+    image: edilsonss123/php:8.2
+    volumes:
+      - ./app:/var/www/apps/
+      - ./data/conf.d/memory.ini:/usr/local/etc/php/conf.d/docker-php-ext-memory.ini
+      - ./data/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+    ports:
+      - 8023:8000
+    command: tail -f /dev/null
+  # web-crud-pessoa-com-eduardo:
+  #   container_name: web-crud-pessoa-com-eduardo
+  #   image: nginx:latest
+  #   ports:
+  #     - "2080:80"
+  #   volumes:
+  #     - ./web:/usr/share/nginx/html
+  #   restart: always

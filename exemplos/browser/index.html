@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cronômetro</title>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(145deg, #0f172a, #1e293b);
+      color: #e2e8f0;
+    }
+    .app {
+      text-align: center;
+      padding: 2rem 2.5rem;
+      border-radius: 1rem;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      max-width: 22rem;
+      width: 100%;
+    }
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 0 0 1.5rem;
+      letter-spacing: 0.02em;
+      color: #94a3b8;
+    }
+    .display {
+      font-variant-numeric: tabular-nums;
+      font-size: 2.75rem;
+      font-weight: 300;
+      letter-spacing: 0.05em;
+      margin-bottom: 1.5rem;
+      color: #f8fafc;
+      user-select: none;
+    }
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.65rem 1.1rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: transform 0.08s ease, opacity 0.15s ease;
+    }
+    button:active {
+      transform: scale(0.97);
+    }
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .btn-start {
+      background: #22c55e;
+      color: #052e16;
+    }
+    .btn-pause {
+      background: #eab308;
+      color: #422006;
+    }
+    .btn-reset {
+      background: #64748b;
+      color: #f8fafc;
+    }
+    .btn-lap {
+      background: #3b82f6;
+      color: #eff6ff;
+    }
+    .laps {
+      margin-top: 1.5rem;
+      text-align: left;
+      max-height: 10rem;
+      overflow-y: auto;
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+    .laps h2 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin: 0 0 0.5rem;
+      color: #64748b;
+    }
+    .lap-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.35rem 0;
+      border-bottom: 1px solid rgba(71, 85, 105, 0.35);
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>Cronômetro</h1>
+    <div class="display" id="display" aria-live="polite">00:00.00</div>
+    <div class="buttons">
+      <button type="button" class="btn-start" id="btnStart">Iniciar</button>
+      <button type="button" class="btn-pause" id="btnPause" disabled>Pausar</button>
+      <button type="button" class="btn-reset" id="btnReset" disabled>Zerar</button>
+      <button type="button" class="btn-lap" id="btnLap" disabled>Volta</button>
+    </div>
+    <div class="laps" id="lapsWrap" hidden>
+      <h2>Voltas</h2>
+      <div id="lapsList"></div>
+    </div>
+  </div>
+
+  <script>
+    (function ($) {
+      var elapsedMs = 0;
+      var startedAt = null;
+      var lapIndex = 0;
+      var rafId = null;
+
+      function pad2(n) {
+        return (n < 10 ? "0" : "") + n;
+      }
+
+      function formatTime(ms) {
+        var total = Math.floor(ms / 10);
+        var cent = total % 100;
+        total = Math.floor(total / 100);
+        var s = total % 60;
+        total = Math.floor(total / 60);
+        var m = total % 60;
+        var h = Math.floor(total / 60);
+        var base = pad2(m) + ":" + pad2(s) + "." + pad2(cent);
+        return h > 0 ? pad2(h) + ":" + base : base;
+      }
+
+      function currentElapsed() {
+        if (startedAt === null) {
+          return elapsedMs;
+        }
+        return elapsedMs + (performance.now() - startedAt);
+      }
+
+      function tick() {
+        $("#display").text(formatTime(currentElapsed()));
+        updateButtons();
+        if (startedAt !== null) {
+          rafId = requestAnimationFrame(tick);
+        }
+      }
+
+      function updateButtons() {
+        var running = startedAt !== null;
+        var hasSomething = currentElapsed() > 0 || lapIndex > 0;
+        $("#btnStart").prop("disabled", running);
+        $("#btnPause").prop("disabled", !running);
+        $("#btnReset").prop("disabled", !hasSomething);
+        $("#btnLap").prop("disabled", !running);
+      }
+
+      function start() {
+        if (startedAt !== null) {
+          return;
+        }
+        startedAt = performance.now();
+        updateButtons();
+        rafId = requestAnimationFrame(tick);
+      }
+
+      function pause() {
+        if (startedAt === null) {
+          return;
+        }
+        elapsedMs += performance.now() - startedAt;
+        startedAt = null;
+        if (rafId !== null) {
+          cancelAnimationFrame(rafId);
+          rafId = null;
+        }
+        $("#display").text(formatTime(elapsedMs));
+        updateButtons();
+      }
+
+      function reset() {
+        if (startedAt !== null) {
+          startedAt = null;
+          if (rafId !== null) {
+            cancelAnimationFrame(rafId);
+            rafId = null;
+          }
+        }
+        throw new Error("teste");
+        
+        elapsedMs = 0;
+        lapIndex = 0;
+        $("#display").text("00:00.00");
+        $("#lapsList").empty();
+        $("#lapsWrap").attr("hidden", true);
+        updateButtons();
+      }
+
+      function lap() {
+        if (startedAt === null) {
+          return;
+        }
+        var listEl = document.getElementById("lapsList");
+        var wrapEl = document.getElementById("lapsWrap");
+        if (!listEl || !wrapEl) {
+          return;
+        }
+
+        if (lapIndex == 2) {
+            lapIndex = 0;
+        }
+        
+        lapIndex += 1;
+        var t = formatTime(currentElapsed());
+        wrapEl.removeAttribute("hidden");
+        var row = document.createElement("div");
+        row.className = "lap-row";
+        var label = document.createElement("span");
+        label.textContent = "Volta " + lapIndex;
+        var timeEl = document.createElement("span");
+        timeEl.textContent = t;
+        row.appendChild(label);
+        row.appendChild(timeEl);
+        listEl.insertBefore(row, listEl.firstChild);
+        updateButtons();
+      }
+
+      $(function () {
+        $("#btnStart").on("click", start);
+        $("#btnPause").on("click", pause);
+        $("#btnReset").on("click", reset);
+        $("#btnLap").on("click", lap);
+        updateButtons();
+      });
+    })(jQuery);
+  </script>
+</body>
+</html>

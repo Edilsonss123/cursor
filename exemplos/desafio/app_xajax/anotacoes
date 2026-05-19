@@ -1,0 +1,30 @@
+# app xajax legado
+
+# PHP 8: E_DEPRECATED suprimido (bootstrap + data/conf.d/error_reporting.ini)
+
+# patches PHP 8:
+# - xajaxArgumentManager.inc.php (get_magic_quotes_gpc)
+# - xajaxResponseManager.inc.php (propriedade aSettings)
+# - index.php: register(XAJAX_FUNCTION, 'fn') — nao registerFunction()
+# - plugins: __construct PHP 8 + array_keys(?? array())
+# - xajaxPluginManager.inc.php: \n escapado no alert JS
+# - xajaxPluginManager.inc.php: xajax_core.js carrega ANTES dos stubs
+# - xajaxUserFunction.inc.php: __construct (PHP8 nao chama construtor PHP4!)
+#   sem isso stubs saem como xajax_ com xjxfun vazio
+# - index.php: scriptLoadTimeout = 0 (desativa bloco de alert quebrado)
+# - index.php: javascript URI = vendor/ (nao vendor/xajax_js/)
+# - index.php: deferScriptGeneration = false
+
+docker compose up -d
+
+# servidor PHP sobe automatico na porta 8024
+# browser: http://localhost:8024/login.php
+
+# shell no container (opcional):
+# docker exec -it app-xajax-legado bash
+
+# usuarios seed (senha = texto puro - legado):
+# admin@legado.local / admin123  -> ADMIN
+# super@legado.local / super123  -> SUPERVISOR
+# op@legado.local / op123        -> OPERADOR
+# view@legado.local / view123    -> VISUALIZADOR
